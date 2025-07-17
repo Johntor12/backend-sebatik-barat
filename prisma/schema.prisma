@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  admin
+  visitor
+}
+
+enum NamaDesa {
+  binalawan
+  liangbunyu
+  setabu
+  enreukan
+}
+
+model User {
+  id       Int      @id @default(autoincrement())
+  username String   @unique
+  email    String   @unique
+  password String
+  role     Role?    @default(visitor)
+  admin    Admin?
+  Berita   Berita[]
+}
+
+model Admin {
+  adminId  Int      @id @default(autoincrement())
+  userId   Int      @unique
+  username String
+  status   String
+  desa     NamaDesa
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  berita Berita[]
+}
+
+model Berita {
+  beritaId     Int      @id @default(autoincrement())
+  judul        String
+  isi          String
+  gambarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  authorId     Int
+  author       User     @relation(fields: [authorId], references: [id])
+  desa         NamaDesa
+  Admin        Admin?   @relation(fields: [adminAdminId], references: [adminId])
+  adminAdminId Int?
+}
+
+model Galeri {
+  galeriId   Int      @id @default(autoincrement())
+  judul      String
+  gambarUrl  String
+  desa       NamaDesa
+  uploadedAt DateTime @default(now())
+}
+
+model Peraturan {
+  peraturanId Int      @id @default(autoincrement())
+  judul       String
+  fileUrl     String // bisa PDF atau link
+  desa        NamaDesa
+  uploadedAt  DateTime @default(now())
+}
