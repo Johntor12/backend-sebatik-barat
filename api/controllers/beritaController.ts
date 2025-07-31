@@ -4,22 +4,39 @@ import { esClient } from "../lib/elasticsearch";
 import { error } from "console";
 
 export const createNewsController = async (req: Request, res : Response) => {
-    const { judul, isi, gambarUrl, author, desa } = req.body;
+    const { judul, isi, gambarUrl, desa } = req.body;
+
+    const userId = req.user?.id;
     
-    const { username } = req.user!;
+    const username = req.user?.username;
+    console.log("Username saya : ", username);
 
     try {
-        if (!judul || !isi || !author || !desa) {
+        if (!judul || !isi || !desa) {
             return res.status(400).json({ error: "Data is not complete!" });
         }
         
         const validDesa = ["binalawan", "liangbunyu", "setabu", "enreukan"];
         if (!validDesa.includes(desa)) {
-        return res.status(400).json({ error: "Desa tidak valid!" });
+            return res.status(400).json({ error: "Desa tidak valid!" });
         }
 
+        // ✅ Cari admin berdasarkan userId
+        const admin = await prisma.admin.findUnique({
+            where: { userId: userId },
+        });
+
+
         const newBerita = await prisma.berita.create({
-            data: { judul, isi, gambarUrl, author, desa }
+            data: {
+                judul,
+                isi,
+                gambarUrl,
+                desa,
+                author: {
+                    connect: { username },
+                },
+             },
         })
 
         await esClient.index({
@@ -36,14 +53,15 @@ export const createNewsController = async (req: Request, res : Response) => {
 
         return res.status(201).json({ message : "Berita berhasil dibuat!", berita : newBerita})
     } catch (err) {
+        console.error("Error saat membuat berita:", err);
         return res.status(500).json({ message: "Gagal membuat berita. Coba lagi!", error : err});
     }
 }
 
 export const getNewsByNewsIdController = async (req: Request, res: Response) => {
-    const { id } = req.params;
+    const {beritaId } = req.params;
 
-    const newsId = parseInt(id, 10);
+    const newsId = parseInt(beritaId, 10);
     
     if (isNaN(newsId) || newsId <= 0) {
         return res.status(400).json({
@@ -72,7 +90,6 @@ export const getNewsByNewsIdController = async (req: Request, res: Response) => 
             err: err
         })
     }
-
 }
 
 export const searchNewsController = async (req: Request, res: Response) => {
