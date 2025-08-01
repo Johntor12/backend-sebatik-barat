@@ -7,6 +7,9 @@ import { connectDatabase } from './api/prisma/connectDatabase';
 import authRoutes from "./api/routes/authRoutes";
 import beritaRoutes from "./api/routes/beritaRoutes";
 import dotenv from 'dotenv';
+// import { runSeeders } from './prisma/seed';
+
+// runSeeders();
 
 dotenv.config();
 
