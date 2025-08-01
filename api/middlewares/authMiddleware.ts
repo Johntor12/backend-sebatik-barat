@@ -121,5 +121,5 @@ export const isAdmin = async (
     console.error("isAdmin middleware error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
-  next();
+  // next();
 };
