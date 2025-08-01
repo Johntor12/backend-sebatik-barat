@@ -9,7 +9,12 @@ export const registerController = async (req: Request, res: Response) => {
 
   const { username, email, password, role } = req.body;
 
+  if (!username || !email || !password || !role) {
+    res.status(403).json({ message: "Data tidak lengkap!" });
+  }
+
   const errors = validationResult(req);
+  
   if (!errors.isEmpty()) {
     const firstError = errors.array().map((error) => error.msg)[0];
     return res.status(422).json({
@@ -68,10 +73,10 @@ export const loginController = async (req: Request, res: Response) => {
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) return res.status(401).json({ message: 'Invalid password' });
 
-    // console.log('JWT_SECRET:', process.env.JWT_SECRET);
+    console.log('JWT_SECRET:', process.env.JWT_SECRET);
 
     const token = jwt.sign(
-      { id: user.id, role: user.role },
+      { id: user.id, username: user.username, role: user.role },
       process.env.JWT_SECRET!,
       { expiresIn: '1d' }
     );
@@ -79,7 +84,7 @@ export const loginController = async (req: Request, res: Response) => {
     res.cookie('cookiesSebatik', token, {
       domain: "localhost",
       httpOnly: true,
-      secure: true,
+      secure: false,
       sameSite: 'lax',
       maxAge: 1 * 24 * 60 * 60 * 1000,
       path: "/"

@@ -6,6 +6,7 @@ import { HttpError } from './api/utils/HttpError';
 import { connectDatabase } from './api/prisma/connectDatabase';
 import authRoutes from "./api/routes/authRoutes";
 import beritaRoutes from "./api/routes/beritaRoutes";
+import userRoutes from "./api/routes/userRoutes";
 import dotenv from 'dotenv';
 // import { runSeeders } from './prisma/seed';
 
@@ -26,7 +27,8 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
-app.use('/news', beritaRoutes);
+app.use('/api/news', beritaRoutes);
+app.use('/api/user', userRoutes);
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   next(new HttpError("Not Found", 404));
